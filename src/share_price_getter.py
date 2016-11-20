@@ -27,13 +27,18 @@ class SharePriceGetter():
         window = days_between_dates.days
         return __google_api_get_price__(self.share_symbol, self.sec_interval, window)
 
+
+    def getCurrentPrice(self):
+        self.share.refresh()
+        return self.share.get_price()
+
 def __google_api_get_price__(share_symbol, sec_interval, window):
     start = dt.datetime(1999, 1, 10)
     end = dt.datetime(2016, 11, 19)
     df = web.DataReader("LSE:LLOY", 'google', start, end)
     ts_list = df.index.tolist()  # a list of Timestamp's
-    date_list = [int(round(ts.to_datetime().timestamp())) for ts in ts_list]  # a list of datetime.date's
-    date_str_list = [str(date) for date in date_list]  # a list of strings
+    date_list = [int(round(ts.to_datetime().timestamp())) for ts in ts_list]
+    date_str_list = [str(date) for date in date_list]
     df['time_stamp'] = date_str_list
     df['index_c'] = range(0, len(df))
     df['d_time'] = df.index
@@ -44,14 +49,3 @@ def __google_api_get_price__(share_symbol, sec_interval, window):
     return df
 
 
-    def getCurrentPrice(self):
-        self.share.refresh()
-        return self.share.get_price()
-
-
-    def plot_prices(prices):
-        plt.title('Opening stock prices')
-        plt.xlabel('day')
-        plt.ylabel('price')
-        plt.plot(prices)
-        plt.savefig('prices.png')
