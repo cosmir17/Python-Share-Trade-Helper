@@ -72,9 +72,14 @@ def __google_api_get_price__(share_symbol, sec_interval, window):
     #         # now_time_in_format = dt.unicode(now_time)
     #         parsed_data.append((cts, now_time, float(cdata[1]), float(cdata[2]), float(cdata[3]), float(cdata[4]), float(cdata[5])))
     # df = pd.DataFrame(parsed_data)
-    # df.columns = ['tstamp', 'datetime', 'o', 'h', 'l', 'c', 'v'] #date_time open high low close volume
+    # df.columns = ['datetime', 'o', 'h', 'l', 'c', 'v'] #date_time open high low close volume
     # df.index = df.ts
     # del df['ts']
+
+
+    df['index_c'] = range(0, len(df))
+    df['d_time'] = df.index
+    df.index = df.index_c
 
     timestamp_oneday = 86400
 
@@ -82,20 +87,21 @@ def __google_api_get_price__(share_symbol, sec_interval, window):
     df_next_index = 0
     df_length = len(df.index)
 
-    last_day = df.get_value(df_length-1, '')
 
-    while df_next_index < df_length:
-        initial_timestamp = df.get_value(df_next_index, 'tstamp')
-        temp_datetime = dt.datetime.fromtimestamp(initial_timestamp)
-        day_plus_timestamp = initial_timestamp + timestamp_oneday
-        mask = (df['tstamp'] > initial_timestamp) & (df['tstamp'] <= day_plus_timestamp)
-        dframes = df.loc[mask]
-        daily_stock_dictionary[temp_datetime] = dframes
-        dframe_length = len(dframes.index)
-        temp_df_lastindex_timestamp = dframes.get_value(dframe_length-1, 'tstamp')
-        df_next_index += dframe_length
+    last_day = df.get_value(df_length-1, 'd_time')
 
-    print (daily_stock_dictionary)
+    # while df_next_index < df_length:
+    #     initial_day = df.get_value(df_next_index, 'd_time')
+    #     # temp_datetime = dt.datetime.fromtimestamp(initial_day)
+    #     # day_plus_timestamp = initial_day + timestamp_oneday
+    #     # mask = (df['tstamp'] > initial_day) & (df['tstamp'] <= day_plus_timestamp)
+    #     # dframes = df.loc[mask]
+    #     daily_stock_dictionary[temp_datetime] = dframes
+    #     dframe_length = len(dframes.index)
+    #     temp_df_lastindex_timestamp = dframes.get_value(dframe_length-1, 'tstamp')
+    #     df_next_index += dframe_length
+    #
+    # print (daily_stock_dictionary)
              # = dframes.get_value(lastindex_number, 'tstamp')
 
 
