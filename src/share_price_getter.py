@@ -4,6 +4,7 @@ import numpy as np
 import datetime as dt
 import pandas as pd
 from pathlib import Path
+from pandas_datareader import data as web
 
 class SharePriceGetter():
     def __init__(self, share_symbol, sec_interval):
@@ -27,33 +28,51 @@ class SharePriceGetter():
         return __google_api_get_price__(self.share_symbol, self.sec_interval, window)
 
 def __google_api_get_price__(share_symbol, sec_interval, window):
-    url_root = 'http://www.google.com/finance/getprices?i='
-    url_root += str(sec_interval) + '&p=' + str(window)
-    url_root += 'd&f=d,o,h,l,c,v&df=cpct&q=' + share_symbol
+    start = dt.datetime(1999, 1, 10)
+    end = dt.datetime(2016, 11, 19)
+    df = web.DataReader("LSE:LLOY", 'google', start, end)
+    # print
+    # df.head(10)
 
-    response = urllib.request.urlopen(url_root)
-    data = response.read().split(b'\n')
-    parsed_data = []
 
-    for i in range(7, len(data) - 1):
-        cdata = data[i].split(b',')
-        cdata0 = cdata[0]
-        if b'a' in cdata0:  # first one record anchor timestamp
-            anchor_stamp = cdata0.replace(b'a', b'')
-            cts = int(anchor_stamp)
-        elif b'TIMEZONE_OFFSET=0' in cdata0:
-            pass
-        else:
-            coffset = int(cdata[0])
-            cts = int(anchor_stamp) + (coffset * sec_interval)
+    # http: // www.google.com / finance / historical?q = NASDAQ:AAPL & startdate = Jan + 01 % 2C + 2000 & output = csv
+    # url_root = 'http://www.google.com/finance/historical?'
+    # url_root += 'i=' + str(sec_interval) + '&'
+    # url_root += 'q=' + 'LSE:' + share_symbol + '&'
+    # url_root += 'startdate=Jan+01%2C+2000'
 
-            # yesterday = dt.date.today() - dt.timedelta(1)
-            # unix_time = yesterday.strftime("%s")  # Second as a decimal number [00,61] (or Unix Timestamp)
-            now_time = dt.datetime.fromtimestamp(float(cts))
-            # now_time_in_format = dt.unicode(now_time)
-            parsed_data.append((cts, now_time, float(cdata[1]), float(cdata[2]), float(cdata[3]), float(cdata[4]), float(cdata[5])))
-    df = pd.DataFrame(parsed_data)
-    df.columns = ['tstamp', 'datetime', 'o', 'h', 'l', 'c', 'v'] #date_time open high low close volume
+    # url_root += 'd&f=d,o,h,l,c,v&df=cpct&q=' + share_symbol
+    # output=csv
+    # + '&p=' + str(window)
+
+    # for
+    # url_root = 'http://www.google.com/finance/getprices?i='
+    # url_root += str(sec_interval) + '&p=' + str(window) + 'd&'
+    # url_root += 'f=d,o,h,l,c,v&df=cpct&q=' + share_symbol
+    # response = urllib.request.urlopen(url_root)
+    # data = response.read().split(b'\n')
+    #
+    # parsed_data = []
+    #
+    # for i in range(7, len(data) - 1):
+    #     cdata = data[i].split(b',')
+    #     cdata0 = cdata[0]
+    #     if b'a' in cdata0:  # first one record anchor timestamp
+    #         anchor_stamp = cdata0.replace(b'a', b'')
+    #         cts = int(anchor_stamp)
+    #     elif b'TIMEZONE_OFFSET=0' or b'TIMEZONE_OFFSET=60' in cdata0:
+    #         pass
+    #     else:
+    #         coffset = int(cdata[0])
+    #         cts = int(anchor_stamp) + (coffset * sec_interval)
+    #
+    #         # yesterday = dt.date.today() - dt.timedelta(1)
+    #         # unix_time = yesterday.strftime("%s")  # Second as a decimal number [00,61] (or Unix Timestamp)
+    #         now_time = dt.datetime.fromtimestamp(float(cts))
+    #         # now_time_in_format = dt.unicode(now_time)
+    #         parsed_data.append((cts, now_time, float(cdata[1]), float(cdata[2]), float(cdata[3]), float(cdata[4]), float(cdata[5])))
+    # df = pd.DataFrame(parsed_data)
+    # df.columns = ['tstamp', 'datetime', 'o', 'h', 'l', 'c', 'v'] #date_time open high low close volume
     # df.index = df.ts
     # del df['ts']
 
@@ -63,7 +82,8 @@ def __google_api_get_price__(share_symbol, sec_interval, window):
     df_next_index = 0
     df_length = len(df.index)
 
-    # for i in range(df.size):
+    last_day = df.get_value(df_length-1, '')
+
     while df_next_index < df_length:
         initial_timestamp = df.get_value(df_next_index, 'tstamp')
         temp_datetime = dt.datetime.fromtimestamp(initial_timestamp)
@@ -72,7 +92,7 @@ def __google_api_get_price__(share_symbol, sec_interval, window):
         dframes = df.loc[mask]
         daily_stock_dictionary[temp_datetime] = dframes
         dframe_length = len(dframes.index)
-        temp_df_lastindex_timestamp = dframes.get_value(dframe_length, 'tstamp')
+        temp_df_lastindex_timestamp = dframes.get_value(dframe_length-1, 'tstamp')
         df_next_index += dframe_length
 
     print (daily_stock_dictionary)
