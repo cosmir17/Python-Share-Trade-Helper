@@ -7,9 +7,8 @@ from pathlib import Path
 from pandas_datareader import data as web
 
 class SharePriceGetter():
-    def __init__(self, share_symbol, sec_interval):
+    def __init__(self, share_symbol):
         self.share_symbol = share_symbol
-        self.sec_interval = sec_interval
         self.cache_filename = share_symbol + '_stock_prices.npy'
 
     def get_price_list(self, start_date, end_date):
@@ -25,17 +24,16 @@ class SharePriceGetter():
         dt_end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
         days_between_dates = dt_end_date - dt_start_date
         window = days_between_dates.days
-        return __google_api_get_price__(self.share_symbol, self.sec_interval, window)
-
+        return __google_api_get_price__(self.share_symbol)
 
     def getCurrentPrice(self):
         self.share.refresh()
         return self.share.get_price()
 
-def __google_api_get_price__(share_symbol, sec_interval, window):
+def __google_api_get_price__(share_symbol):
     start = dt.datetime(1999, 1, 10)
     end = dt.datetime(2016, 11, 19)
-    df = web.DataReader("LSE:LLOY", 'google', start, end)
+    df = web.DataReader("LSE:"+share_symbol, 'google', start, end)
     ts_list = df.index.tolist()  # a list of Timestamp's
     date_list = [int(round(ts.to_datetime().timestamp())) for ts in ts_list]
     date_str_list = [str(date) for date in date_list]
