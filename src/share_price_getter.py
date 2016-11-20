@@ -40,10 +40,9 @@ def __google_api_get_price__(share_symbol):
     df['time_stamp'] = date_str_list
     df['index_c'] = range(0, len(df))
     df['d_time'] = df.index
+    del df['d_time']
     df.index = df.index_c
-    df_length = len(df.index)
-    last_day = df.get_value(df_length-1, 'd_time')
-
+    del df['index_c']
     return df
 
 
