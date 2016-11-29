@@ -14,3 +14,5 @@ Dependencies :
 
 Studied 'reinforcement learning' chapter in the book below, utilised the source code uploaded on the site and creating a new project.
 https://www.manning.com/books/machine-learning-with-tensorflow
+
+The original logic was to buy/sell a share rathers than a number of shares. I made a few changes so that this also needs to be changed.
