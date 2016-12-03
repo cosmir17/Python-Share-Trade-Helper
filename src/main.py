@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     budget = 2400.0
     # num_stocks = 0
-    avg, std = Trainer.train_multiple_times(policy, budget, prices)
+    avg, std = Trainer(policy, budget, prices).train_multiple_times()
     print(avg, std)
 
     # thread1 = real_time_decider(policy, budget, num_stocks).start()
