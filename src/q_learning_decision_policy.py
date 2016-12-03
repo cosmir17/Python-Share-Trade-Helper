@@ -7,7 +7,7 @@ from src.decision_policy import DecisionPolicy
 
 
 class QLearningDecisionPolicy(DecisionPolicy):
-    def __init__(self, actions, input_dim): # 8 = open + high + low + close + volume + timestamp + myshare_no + my_budget_left
+    def __init__(self, actions, input_dim): # 8 = open + high + low + close + volume + timestamp + number of shares + my_budget_left
         self.epsilon = 0.9
         self.gamma = 0.001
         self.actions = actions
@@ -44,9 +44,25 @@ class QLearningDecisionPolicy(DecisionPolicy):
         return action
 
     def update_q(self, state, action, reward, next_state):
+
         action_q_vals = self.sess.run(self.q, feed_dict={self.x: state})
+        first = action_q_vals[0,0]
+        second = action_q_vals[0,1]
+        third = action_q_vals[0,2]
+
         next_action_q_vals = self.sess.run(self.q, feed_dict={self.x: next_state})
-        next_action_idx = np.argmax(next_action_q_vals)
-        action_q_vals[0, next_action_idx] = reward + self.gamma * next_action_q_vals[0, next_action_idx]
-        action_q_vals = np.squeeze(np.asarray(action_q_vals))
-        self.sess.run(self.train_op, feed_dict={self.x: state, self.y: action_q_vals})
+        next_first = next_action_q_vals[0,0]
+        next_second = next_action_q_vals[0,1]
+        next_third = next_action_q_vals[0,2]
+        next = next_action_q_vals
+
+        index_next = np.argmax(next)
+        something = reward + self.gamma * next[0, index_next]
+
+        action_q_vals[0, index_next] = something
+        first_ =action_q_vals[0,0]
+        second_= action_q_vals[0,1]
+        third_ = action_q_vals[0,2]
+
+        updated_new_action_q_vals = np.squeeze(np.asarray(action_q_vals))
+        self.sess.run(self.train_op, feed_dict={self.x: state, self.y: updated_new_action_q_vals})

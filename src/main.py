@@ -7,12 +7,12 @@ if __name__ == '__main__':
     prices = s_price_getter.get_price_list('2000-01-01', '2016-10-28')
     actions = ['Buy', 'Sell', 'Hold']
 
-    dimensions = 8  # open + high + low + close + volume + timestamp + myshare_no + my_budget_left
+    dimensions = 8  # open + high + low + close + volume + timestamp + no_of_shares +my_budget_left
     policy = QLearningDecisionPolicy(actions, dimensions)
 
     budget = 2400.0
-    num_stocks = 0
-    avg, std = Trainer.train_multiple_times(policy, budget, num_stocks, prices)
+    # num_stocks = 0
+    avg, std = Trainer.train_multiple_times(policy, budget, prices)
     print(avg, std)
 
     # thread1 = real_time_decider(policy, budget, num_stocks).start()
