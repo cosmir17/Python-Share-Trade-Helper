@@ -13,7 +13,7 @@ class QLearningDecisionPolicy(DecisionPolicy):
         self.actions = actions
         output_dim = len(actions) #3(buy, sell, hold) + how many share sell or buy
 
-        h1_dim = 8 #next layer dimension
+        h1_dim = 30 #next layer dimension
 
         self.y = tf.placeholder(tf.float32, [output_dim]) #output tensor 4dimension
 
@@ -22,9 +22,22 @@ class QLearningDecisionPolicy(DecisionPolicy):
         b1 = tf.Variable(tf.constant(0.1, shape=[h1_dim]))
         h1 = tf.nn.relu(tf.matmul(self.x, W1) + b1) #next layer
 
-        W2 = tf.Variable(tf.random_normal([h1_dim, output_dim]))
+
+        hidden_layer_w2 = tf.Variable(tf.random_normal([h1_dim, h1_dim]))
+        hidden_layer_b2 = tf.Variable(tf.constant(0.1, shape=[h1_dim]))
+        hidden_layer_h2 = tf.nn.relu(tf.matmul(h1, hidden_layer_w2) + hidden_layer_b2)  # next layer
+
+        hidden_layer_w3 = tf.Variable(tf.random_normal([h1_dim, h1_dim]))
+        hidden_layer_b3 = tf.Variable(tf.constant(0.1, shape=[h1_dim]))
+        hidden_layer_h3  = tf.nn.relu(tf.matmul(hidden_layer_h2, hidden_layer_w3) + hidden_layer_b3)  # next layer
+
+        hidden_layer_w4 = tf.Variable(tf.random_normal([h1_dim, h1_dim]))
+        hidden_layer_b4 = tf.Variable(tf.constant(0.1, shape=[h1_dim]))
+        hidden_layer_h4 = tf.nn.relu(tf.matmul(hidden_layer_h3, hidden_layer_w4) + hidden_layer_b4)  # next layer
+
+        w2 = tf.Variable(tf.random_normal([h1_dim, output_dim]))
         b2 = tf.Variable(tf.constant(0.1, shape=[output_dim]))
-        self.q = tf.nn.relu(tf.matmul(h1, W2) + b2) #output layer?
+        self.q = tf.nn.relu(tf.matmul(hidden_layer_h4, w2) + b2) #output layer?
 
         loss = tf.square(self.y - self.q)
         self.train_op = tf.train.AdagradOptimizer(0.01).minimize(loss)
